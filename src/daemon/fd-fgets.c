@@ -1,5 +1,5 @@
 /* fd-fgets.c --
- * Copyright 2019 Red Hat Inc.
+ * Copyright 2019,2020 Red Hat Inc.
  * All Rights Reserved.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -38,17 +38,9 @@ int fd_fgets_eof(void)
 	return eof;
 }
 
-/* Function to check if we have more data stored
- * and ready to process. If we have a newline or enough
- * bytes we return 1 for success. Otherwise 0 meaning that
- * there is not enough to process without blocking. */
-int fd_fgets_more(size_t blen)
+void fd_fgets_rewind(void)
 {
-	char *ptr = strchr(buffer, '\n');
-	assert(blen != 0);
-	if (ptr || (size_t)(current-buffer) >= blen-1)
-		return 1;
-	return 0;
+	eof = 0;
 }
 
 int fd_fgets(char *buf, size_t blen, int fd)

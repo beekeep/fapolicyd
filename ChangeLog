@@ -1,3 +1,5 @@
+1.0.2
+
 1.0.1
 - If trust db is empty when fapolicyd-cli dumps it, say its empty
 - Make fapolicyd-cli buffer bigger for rule listing
@@ -8,6 +10,8 @@
 - Fix logging of object trust
 - Correct denial accounting
 - Add new form of LD_PRELOAD pattern detection
+- Fix mount reading routine to get it all
+- Update languages kept from /usr/share
 
 1.0
 - Add file size, IMA, and sha256 based integrity checking

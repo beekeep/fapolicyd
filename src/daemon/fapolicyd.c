@@ -326,6 +326,7 @@ static void handle_mounts(int fd)
 
 	// Rewind the descriptor
 	lseek(fd, 0, SEEK_SET);
+	fd_fgets_rewind();
 	mlist_mark_all_deleted(m);
 	do {
 		// Get a line
@@ -342,9 +343,8 @@ static void handle_mounts(int fd)
 				} else
 					mlist_append(m, point);
 			}
-		} else if (fd_fgets_eof())
-			break;
-	} while (fd_fgets_more(sizeof(buf)));
+		}
+	} while (!fd_fgets_eof());
 
 	// update marks
 	fanotify_update(m);

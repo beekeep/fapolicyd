@@ -1,5 +1,5 @@
 AC_REVISION($Revision: 1.3 $)dnl
-AC_INIT(fapolicyd,1.0.1)
+AC_INIT(fapolicyd,1.0.2)
 AC_PREREQ(2.12)dnl
 AM_CONFIG_HEADER(config.h)
 AC_CONFIG_MACRO_DIR([m4])
@@ -66,6 +66,10 @@ AC_HEADER_STDC
 AC_CHECK_HEADER(sys/fanotify.h, , [AC_MSG_ERROR(
 ["Couldn't find sys/fanotify.h...your kernel might not be new enough"] )])
 AC_CHECK_FUNCS(fexecve, [], [])
+
+AC_CHECK_HEADER(uthash.h, , [AC_MSG_ERROR(
+["Couldn't find uthash.h...uthash-devel is missing"] )])
+
 
 echo .
 echo Checking for required libraries

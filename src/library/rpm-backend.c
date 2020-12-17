@@ -32,6 +32,8 @@
 #include <rpm/rpmdb.h>
 #include <fnmatch.h>
 
+#include <uthash.h>
+
 #include "message.h"
 
 #include "fapolicyd-backend.h"
@@ -181,16 +183,65 @@ static int drop_path(const char *file_name)
 			// Drop anything in /usr/share that's
 			// not python, javascript, or has a libexec dir
 			if (file_name[6] == 'h' ) {
+				// These are roughly ordered by quantity
+				// Python byte code
 				if (fnmatch("*.py?",
 						 file_name, 0) == 0)
 					return 0;
+				// Python text files
 				else if (fnmatch("*.py",
 						 file_name, 0) == 0)
 					return 0;
+				// Some apps have a private libexec
 				else if (fnmatch("*/libexec/*",
 						file_name, 0) == 0)
 					return 0;
+				// Ruby
+				else if (fnmatch("*.rb",
+						 file_name, 0) == 0)
+					return 0;
+				// Perl
+				else if (fnmatch("*.pl",
+						 file_name, 0) == 0)
+					return 0;
+				// System Tap
+				else if (fnmatch("*.stp",
+						 file_name, 0) == 0)
+					return 0;
+				// Javascript
 				else if (fnmatch("*.js",
+						 file_name, 0) == 0)
+					return 0;
+				// Java
+				else if (fnmatch("*.jar",
+						 file_name, 0) == 0)
+					return 0;
+				// M4
+				else if (fnmatch("*.m4",
+						 file_name, 0) == 0)
+					return 0;
+				// PHP
+				else if (fnmatch("*.php",
+						 file_name, 0) == 0)
+					return 0;
+				// Lisp
+				else if (fnmatch("*.el",
+						 file_name, 0) == 0)
+					return 0;
+				// Perl Modules
+				else if (fnmatch("*.pm",
+						 file_name, 0) == 0)
+					return 0;
+				// Lua
+				else if (fnmatch("*.lua",
+						 file_name, 0) == 0)
+					return 0;
+				// Java
+				else if (fnmatch("*.class",
+						 file_name, 0) == 0)
+					return 0;
+				// Compiled Lisp
+				else if (fnmatch("*.elc",
 						 file_name, 0) == 0)
 					return 0;
 				return 1;
@@ -212,6 +263,11 @@ static int drop_path(const char *file_name)
 	return 0;
 }
 
+struct _hash_record {
+	const char * key;
+	UT_hash_handle hh;
+};
+
 extern int debug;
 static int rpm_load_list(void)
 {
@@ -220,6 +276,9 @@ static int rpm_load_list(void)
 
 	// empty list before loading
 	list_empty(&rpm_backend.list);
+
+	// hash table
+	struct _hash_record *hashtable = NULL;
 
 	msg(LOG_INFO, "Loading rpmdb backend");
 	if ((rc = init_rpm())) {
@@ -276,17 +335,41 @@ static int rpm_load_list(void)
 					sha) == -1) {
 				data = NULL;
 			}
-			if (data)
-				list_append(&rpm_backend.list, file_name, data);
-			else {
+
+			if (data) {
+				// getting rid of the duplicates
+				struct _hash_record *rcd = NULL;
+				char key[4096];
+				snprintf(key, 4095, "%s %s", file_name, data);
+
+				HASH_FIND_STR( hashtable, key, rcd );
+
+				if (!rcd) {
+					rcd = (struct _hash_record*) malloc(sizeof(struct _hash_record));
+					rcd->key = strdup(key);
+					HASH_ADD_KEYPTR( hh, hashtable, rcd->key, strlen(rcd->key), rcd );
+					list_append(&rpm_backend.list, file_name, data);
+				} else {
+					free((void*)file_name);
+					free((void*)data);
+				}
+			} else {
 				free((void*)file_name);
 			}
-
 			free((void *)sha);
 		}
 	}
 
 	close_rpm();
+
+	// cleaning up
+	struct _hash_record *item, *tmp;
+	HASH_ITER( hh, hashtable, item, tmp) {
+		HASH_DEL( hashtable, item );
+		free((void*)item->key);
+		free((void*)item);
+	}
+
 	return 0;
 }
 

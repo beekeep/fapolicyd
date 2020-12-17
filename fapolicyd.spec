@@ -1,6 +1,6 @@
 Summary: Application Whitelisting Daemon
 Name: fapolicyd
-Version: 1.0.1
+Version: 1.0.2
 Release: 1
 License: GPLv3+
 URL: http://people.redhat.com/sgrubb/fapolicyd
@@ -10,6 +10,7 @@ BuildRequires: kernel-headers
 BuildRequires: systemd-devel libgcrypt-devel rpm-devel file-devel file
 BuildRequires: libcap-ng-devel libseccomp-devel lmdb-devel
 BuildRequires: python3-devel
+BuildRequires: uthash-devel
 Requires(pre): shadow-utils
 Requires(post): systemd-units
 Requires(preun): systemd-units
@@ -89,5 +90,5 @@ getent passwd %{name} >/dev/null || useradd -r -M -d %{_localstatedir}/lib/%{nam
 %{python3_sitelib}/dnf-plugins/__pycache__/%{name}-dnf-plugin.*.pyc
 
 %changelog
-* Sun May 24 2020 Steve Grubb <sgrubb@redhat.com> 1.0.1-1
+* Mon Nov 16 2020 Steve Grubb <sgrubb@redhat.com> 1.0.2-1
 - New release
